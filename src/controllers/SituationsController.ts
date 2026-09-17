@@ -72,7 +72,7 @@ router.post("/situations", async (req: Request, res: Response) => {
 });
 
 
-//Rota PUT
+//Rota PUT Atualizar uma situação específica
 router.put("/situations/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -107,5 +107,38 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
         return;
     }
 });
+
+
+//Rota DELETE uma situação específica
+router.delete("/situations/:id", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const situationRepository = AppDataSource.getRepository(Situation);
+        const situation = await situationRepository.findOneBy({ id: parseInt(id as string) });
+
+        if (!situation) {
+            res.status(404).json({
+                message: "Situação não encontrada!",
+            });
+            return;
+        }
+
+        // Excluir a situação
+        await situationRepository.remove(situation);
+
+        res.status(200).json({
+            message: "Situação excluída com sucesso!",
+        });
+        return;
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Erro ao excluir situação!",
+        });
+        return;
+    }
+});
+
 
 export default router;
