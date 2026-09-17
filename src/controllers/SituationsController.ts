@@ -21,7 +21,7 @@ router.get("/situations", async (req: Request, res: Response) => {
     }
 });
 
-//Criar visualização do item cadastrado em situação
+//Rota GET para visualizar uma situação específica
 router.get("/situations/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -68,6 +68,43 @@ router.post("/situations", async (req: Request, res: Response) => {
         });
 
 
+    }
+});
+
+
+//Rota PUT
+router.put("/situations/:id", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        var data = req.body;
+
+        const situationRepository = AppDataSource.getRepository(Situation);
+        const situation = await situationRepository.findOneBy({ id: parseInt(id as string) });
+
+        if (!situation) {
+            res.status(404).json({
+                message: "Situação não encontrada!",
+            });
+            return;
+        }
+
+        //Atualizar os dados da situação com os novos valores
+        situationRepository.merge(situation, data);
+
+        // Salvar as alterações no banco de dados
+        const updatedSituation = await situationRepository.save(situation);
+
+        res.status(200).json({
+            message: "Situação atualizada com sucesso!",
+            Situation: updatedSituation,
+        });
+        return;
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Erro ao atualizar situação!",
+        });
+        return;
     }
 });
 
