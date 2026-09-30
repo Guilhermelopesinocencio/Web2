@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Situation } from "../entity/Situations";
+import { PaginationServices } from "../services/PaginationServices";
 
 const router = express.Router();
 
@@ -14,49 +15,12 @@ router.get("/situations", async (req: Request, res: Response) => {
         const page = Number(req.query.page) || 1;
 
         // Definir o limite de registros por página
-        const limite = 1;
+        const limite = Number(req.query.limit) || 10;
 
-        // contar o total de registros no banco de dados
-        const totalSituations = await situationRepository.count();
-
-        // verificar se existem registros no banco de dados
-        if (totalSituations === 0) {
-            res.status(404).json({
-                message: "Nenhuma situação encontrada!",
-            });
-            return;
-        }
-
-        // calcular a ultima pagina
-        const lastPage = Math.ceil(totalSituations / limite);
-
-        // verificar se a pagina solicitada é valida
-        if (page > lastPage) {
-            res.status(404).json({
-                message: `Página Inválida. o total de páginas é ${lastPage}`,
-            });
-            return;
-        }
-
-        // Calcular o offset ( a partir de qual registro começar a buscar)
-        const offset = (page - 1) * limite;
-
-        // recuperar as situações do banco de dados com base na paginação
-        const situations = await situationRepository.find({
-            skip: offset,
-            take: limite,
-            order: {
-                id: "DESC",
-            },
-        });
+        const result = await PaginationServices.paginate(situationRepository, page, limite, { id: "DESC" });
 
         //retornar a resposta com os ados e informações de paginação
-        res.status(200).json({
-            currentPage: page,
-            lastPage: lastPage,
-            totalSituations: totalSituations,
-            situations: situations,
-        })
+        res.status(200).json(result);
         return;
 
     } catch (error) {
