@@ -17,7 +17,10 @@ router.get("/situations", async (req: Request, res: Response) => {
         // Definir o limite de registros por página
         const limite = Number(req.query.limit) || 10;
 
+
+        // Chamar o serviço de paginação para obter os dados paginados
         const result = await PaginationServices.paginate(situationRepository, page, limite, { id: "DESC" });
+
 
         //retornar a resposta com os ados e informações de paginação
         res.status(200).json(result);
