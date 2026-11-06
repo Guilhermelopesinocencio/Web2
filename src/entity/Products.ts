@@ -11,6 +11,15 @@ export class Product {
     @Column()
     name!: string;
 
+    @Column({ unique: true })
+    slug!: string;
+
+    @Column({ type: "longtext" })
+    description!: string;
+
+    @Column({ type: "decimal", precision: 10, scale: 2 })
+    price!: number;
+
     @ManyToOne(() => ProductSituation, (productSituation) => productSituation.products)
     @JoinColumn({ name: "productSituationId" })
     productSituation!: ProductSituation;

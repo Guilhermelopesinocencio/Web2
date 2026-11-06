@@ -1,4 +1,5 @@
 import { AppDataSource } from "./data-source";
+import CreateUsersSeeds from "./seeds/CreateUsersSeeds";
 import CreateSituationsSeeds from "./seeds/CreateSituationsSeeds";
 import CreateProductCategoriesSeeds from "./seeds/CreateProductCategoriesSeeds";
 import CreateProductSituationsSeeds from "./seeds/CreateProductSituationsSeeds";
@@ -19,6 +20,9 @@ const runSeeds = async () => {
         const situationSeeds = new CreateSituationsSeeds();
         //Executa o método run para criar as seeds
         await situationSeeds.run(AppDataSource);
+
+        const usersSeeds = new CreateUsersSeeds();
+        await usersSeeds.run(AppDataSource);
 
         const productCategoriesSeeds = new CreateProductCategoriesSeeds();
         await productCategoriesSeeds.run(AppDataSource);

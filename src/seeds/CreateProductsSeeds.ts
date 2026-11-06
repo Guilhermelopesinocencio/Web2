@@ -44,16 +44,25 @@ export default class CreateProductsSeeds {
         const productsData = [
             {
                 name: 'Smartphone',
+                slug: 'smartphone',
+                description: 'Smartphone de última geração',
+                price: 1999.90,
                 productCategory: categories[0],
                 productSituation: situations[0],
             },
             {
                 name: 'Camiseta',
+                slug: 'camiseta',
+                description: 'Camiseta de algodão',
+                price: 59.90,
                 productCategory: categories[1],
                 productSituation: situations[0],
             },
             {
                 name: 'Arroz',
+                slug: 'arroz',
+                description: 'Arroz tipo 1, pacote de 5 kg',
+                price: 29.90,
                 productCategory: categories[2],
                 productSituation: situations[1],
             },

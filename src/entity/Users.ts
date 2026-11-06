@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
-
 import { Situation } from "./Situations";
 
 @Entity("users")
@@ -13,8 +12,14 @@ export class User {
     @Column({ unique: true })
     email!: string;
 
+    @Column()
+    password!: string;
+
+    @Column({ type: "varchar", length: 255, nullable: true })
+    recoverPassword!: string | null;
+
     @ManyToOne(() => Situation, (situation) => situation.users)
-    @JoinColumn({ name: "situation_id" })
+    @JoinColumn({ name: "situationId" })
     situation!: Situation;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
