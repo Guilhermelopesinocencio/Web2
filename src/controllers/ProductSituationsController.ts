@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituations";
 import { PaginationServices } from "../services/PaginationServices";
+import * as yup from "yup";
 
 const router = express.Router();
 
@@ -70,6 +71,15 @@ router.post("/product-situations", async (req: Request, res: Response) => {
         // Extrair os dados da nova situação de produto do corpo da requisição
         var data = req.body;
 
+        const schema = yup.object().shape({
+            nameSituation: yup.string()
+                .required("O nome da situação é obrigatório!")
+                .min(3, "O nome da situação deve ter no mínimo 3 caracteres!")
+
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
         // Obter o repositório da entidade ProductSituation
         const productSituationRepository = AppDataSource.getRepository(ProductSituation);
 
@@ -84,6 +94,14 @@ router.post("/product-situations", async (req: Request, res: Response) => {
         });
 
     } catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors,
+            });
+            return;
+        }
+
+
         res.status(500).json({
             message: "Erro ao criar situação de produto!",
 
@@ -101,6 +119,16 @@ router.put("/product-situations/:id", async (req: Request, res: Response) => {
 
         // Extrair os dados atualizados da situação de produto do corpo da requisição
         var data = req.body;
+
+
+        const schema = yup.object().shape({
+            nameSituation: yup.string()
+                .required("O nome da situação é obrigatório!")
+                .min(3, "O nome da situação deve ter no mínimo 3 caracteres!")
+
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         // Obter o repositório da entidade ProductSituation
         const productSituationRepository = AppDataSource.getRepository(ProductSituation);
@@ -130,6 +158,13 @@ router.put("/product-situations/:id", async (req: Request, res: Response) => {
         return;
 
     } catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors,
+            });
+            return;
+        }
+
         res.status(500).json({
             message: "Erro ao atualizar situação de produto!",
         });

@@ -3,6 +3,7 @@ import slugify from "slugify";
 import { AppDataSource } from "../data-source";
 import { Product } from "../entity/Products";
 import { PaginationServices } from "../services/PaginationServices";
+import * as yup from "yup";
 
 const router = express.Router();
 
@@ -70,13 +71,20 @@ router.post("/products", async (req: Request, res: Response) => {
     try {
         var data = req.body;
 
-        // O slug é gerado a partir do nome, então o nome é obrigatório
-        if (!data.name) {
-            res.status(400).json({
-                message: "O campo name é obrigatório!",
-            });
-            return;
-        }
+        const schema = yup.object().shape({
+            name: yup.string()
+                .required("O campo name é obrigatório!")
+                .min(3, "O campo name deve ter no mínimo 3 caracteres!"),
+            description: yup.string()
+                .required("O campo description é obrigatório!")
+                .min(3, "O campo description deve ter no mínimo 3 caracteres!"),
+            price: yup.number()
+                .typeError("O campo price deve ser um número!")
+                .required("O campo price é obrigatório!")
+                .positive("O campo price deve ser maior que zero!"),
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         // Gerar o slug automaticamente (ex.: "Camiseta Azul" -> "camiseta-azul")
         data.slug = slugify(data.name, { lower: true, strict: true });
@@ -94,6 +102,13 @@ router.post("/products", async (req: Request, res: Response) => {
         return;
 
     } catch (error: any) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors,
+            });
+            return;
+        }
+
         // Slug duplicado (violação da chave unique)
         if (error?.code === "ER_DUP_ENTRY") {
             res.status(409).json({
@@ -108,13 +123,27 @@ router.post("/products", async (req: Request, res: Response) => {
         return;
     }
 });
-
 // Rota PUT para atualizar um produto existente
 router.put("/products/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
         var data = req.body;
+
+        const schema = yup.object().shape({
+            name: yup.string()
+                .required("O campo name é obrigatório!")
+                .min(3, "O campo name deve ter no mínimo 3 caracteres!"),
+            description: yup.string()
+                .required("O campo description é obrigatório!")
+                .min(3, "O campo description deve ter no mínimo 3 caracteres!"),
+            price: yup.number()
+                .typeError("O campo price deve ser um número!")
+                .required("O campo price é obrigatório!")
+                .positive("O campo price deve ser maior que zero!"),
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const productRepository = AppDataSource.getRepository(Product);
 
@@ -127,10 +156,8 @@ router.put("/products/:id", async (req: Request, res: Response) => {
             return;
         }
 
-        // Regerar o slug apenas se o nome vier no body
-        if (data.name) {
-            data.slug = slugify(data.name, { lower: true, strict: true });
-        }
+        // Como o name agora é obrigatório, o slug é sempre regerado
+        data.slug = slugify(data.name, { lower: true, strict: true });
 
         productRepository.merge(product, data);
 
@@ -143,6 +170,13 @@ router.put("/products/:id", async (req: Request, res: Response) => {
         return;
 
     } catch (error: any) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors,
+            });
+            return;
+        }
+
         if (error?.code === "ER_DUP_ENTRY") {
             res.status(409).json({
                 message: "Já existe um produto com esse nome (slug duplicado)!",
